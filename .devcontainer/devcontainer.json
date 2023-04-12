@@ -1,7 +1,9 @@
 {
     "name": "dev-gh-actions",
     "build": { "dockerfile": "Dockerfile" },
-    "features": {},
+    "features": {
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {} 
+    },
     "hostRequirements": {
      "cpus": 4,
      "memory": "8gb",
