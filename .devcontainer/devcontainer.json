@@ -1,0 +1,28 @@
+{
+    "name": "dev-gh-actions",
+      
+    // Use image if you don't use Docker file
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:16",
+      
+    "hostRequirements": {
+     "cpus": 4,
+     "memory": "8gb",
+     "storage": "32gb"
+    },
+      
+    // Customize vscode
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "redhat-developer.vscode-yaml"
+        ]
+      }
+    },
+    
+    // Cmd to run after install
+     "updateContentCommand": "npm install",
+     "postAttachCommand": "gh extension install https://github.com/nektos/gh-act"
+    
+    // Specify tools from marketplace
+    //"features": {},
+  }
