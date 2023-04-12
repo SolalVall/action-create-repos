@@ -10,6 +10,9 @@ jobs:
   create-gh-action:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run all
       - name: Create repository for new action
         uses: ./
         with:
