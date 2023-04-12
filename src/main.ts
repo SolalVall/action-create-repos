@@ -3,7 +3,8 @@ import * as github from '@actions/github'
 
 (async function main() {
     try {
-        core.info('Create new action');
+        const repo: string = core.getInput('repo_name')
+        core.info('Create new action named ${repo}');
     } catch (error) {
         core.setFailed((<any>error).message);
     }

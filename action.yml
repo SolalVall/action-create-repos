@@ -1,9 +1,9 @@
 name: 'create-gh-action'
 description: 'Standardize github action creation'
 inputs:
-  action_name:
+  repo_name:
     required: true
-    description: 'Name of the repository for your new action'
+    description: 'Name of your new action'
 runs:
   using: 'node16'
   main: 'dist/index.js'

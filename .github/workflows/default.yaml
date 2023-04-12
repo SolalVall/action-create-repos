@@ -1,0 +1,16 @@
+on: 
+  workflow_dispatch:
+   inputs:
+    repository:
+      description: 'Repository name of your new action'
+      required: true
+      type: string
+
+jobs:
+  create-gh-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create repository for new action
+        uses: ./
+        with:
+          repo_name: 'test'

@@ -31,20 +31,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-//import { Lib } from './lib';
-async function main() {
+(async function main() {
     try {
-        core.startGroup('Create new action');
-        // Lib.addCliToPath();
+        core.info('Create new action');
     }
     catch (error) {
         core.setFailed(error.message);
     }
-    finally {
-        core.endGroup();
-    }
-}
-main();
+})();
 
 
 /***/ }),
