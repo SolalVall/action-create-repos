@@ -6,8 +6,3 @@ FROM "${IMG_BASE}/${IMG_TYPE}:${IMG_VERSION}"
 
 # Install act
 RUN curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-
-# Install npm pkgs
-WORKDIR "/workspace/${PJT_NAME}"
-COPY . /workspace/${PJT_NAME}
-RUN npm install 
