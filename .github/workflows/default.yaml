@@ -1,19 +1,25 @@
-on: 
+run-name: 'New github repository [action: ${{ inputs.repository }}]'
+on:
   workflow_dispatch:
-   inputs:
-    repository:
-      description: 'Repository name of your new action'
-      required: true
-      type: string
+    inputs:
+      repository:
+        description: 'Repository name of your new action'
+        required: true
+        type: string
 
 jobs:
-  create-gh-action:
+  create-new-repo:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: npm install
-      - run: npm run all
+      - name: Fetch repository
+        uses: actions/checkout@v3
+      - name: Install node modules
+        run: npm install
+      - name: Formatting
+        run: npm run format
+      - name: Build
+        run: npm run all
       - name: Create repository for new action
         uses: ./
         with:
-          repo_name: 'test'
+          repo_name: ${{ inputs.repository }}

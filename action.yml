@@ -8,5 +8,5 @@ runs:
   using: 'node16'
   main: 'dist/index.js'
 branding:
-    icon: "terminal"
-    color: "green"
+  icon: 'terminal'
+  color: 'green'
