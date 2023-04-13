@@ -23,3 +23,4 @@ jobs:
         uses: ./
         with:
           repo_name: ${{ inputs.repository }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

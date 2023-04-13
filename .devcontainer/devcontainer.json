@@ -11,7 +11,7 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["redhat-developer.vscode-yaml"]
+      "extensions": ["redhat-developer.vscode-yaml", "esbenp.prettier-vscode"]
     }
   },
   "postCreateCommand": "npm install"

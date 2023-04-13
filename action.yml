@@ -4,6 +4,9 @@ inputs:
   repo_name:
     required: true
     description: 'Name of your new action'
+  github_token:
+    required: true
+    description: 'Github token used to create the repository'
 runs:
   using: 'node16'
   main: 'dist/index.js'
