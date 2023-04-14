@@ -32,4 +32,4 @@ jobs:
         with:
           repo_name: ${{ inputs.repository }}
           repo_template: ${{ inputs.template }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ORG_TOKEN }}
