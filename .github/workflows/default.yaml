@@ -1,11 +1,19 @@
-run-name: 'New github repository [action: ${{ inputs.repository }}]'
+name: 'Repository creator'
+run-name: 'Create repository [name: ${{ inputs.repository }}][template: ${{ inputs.template }}]'
 on:
   workflow_dispatch:
     inputs:
       repository:
-        description: 'Repository name of your new action'
+        description: 'Name of your new repository'
         required: true
         type: string
+      template:
+        description: 'Choose the kind of repository'
+        required: true
+        type: choice
+        options:
+          - gh-action
+          - tf-module
 
 jobs:
   create-new-repo:
@@ -23,4 +31,5 @@ jobs:
         uses: ./
         with:
           repo_name: ${{ inputs.repository }}
+          repo_template: ${{ inputs.template }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

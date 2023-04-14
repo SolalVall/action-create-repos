@@ -1,9 +1,12 @@
-name: 'create-gh-action'
-description: 'Standardize github action creation'
+name: 'create-repository'
+description: 'Standardize github repository creation'
 inputs:
   repo_name:
     required: true
-    description: 'Name of your new action'
+    description: 'Name of your new repository'
+  repo_template:
+    required: true
+    description: 'Kind of your new repository'
   github_token:
     required: true
     description: 'Github token used to create the repository'
