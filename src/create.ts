@@ -33,26 +33,11 @@ export async function pushTemplate(
   const octokit = getOctokit(token)
   const tRepo = "action-test-2"
   const bRepo = "actions"
-
-  var mainTarget = await octokit.rest.repos.getBranch({
-    owner,
-    repo: tRepo,
-    branch: "main"
-  })
-
-  console.log(`SHA of main: ${mainTarget.data.commit.sha}`)
-
-  var bTarget = await octokit.rest.repos.getBranch({
-    owner,
-    repo: bRepo,
-    branch: "main"
-  })
-
   var bContent = await octokit.rest.repos
     .getContent({
       owner,
       repo: bRepo,
-      path: ".",
+      path: "tests/templates",
       ref: "main"
     })
     .then((res) => {
@@ -86,6 +71,8 @@ export async function pushTemplate(
     .then((res) => {
       return res.data.tree
     })
+
+  console.log(bTree)
 
   const promises = bTree.map(async (file: any) => {
     // I've excluded all '.github/' blob because they are getting rejected during
