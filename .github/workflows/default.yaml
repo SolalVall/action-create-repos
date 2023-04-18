@@ -1,21 +1,21 @@
-name: 'Repository creator'
-run-name: 'Create repository [name: ${{ inputs.repository }}][template: ${{ inputs.template }}]'
+name: "Repository creator"
+run-name: "Create repository [name: ${{ inputs.repository }}][template: ${{ inputs.template }}]"
 on:
   workflow_dispatch:
     inputs:
       repository:
-        description: 'Name of your new repository'
+        description: "Name of your new repository"
         required: true
         type: string
       template:
-        description: 'Choose the kind of repository'
+        description: "Choose the kind of repository"
         required: true
         type: choice
         options:
           - gh-action
           - tf-module
       personal:
-        description: 'Set to true for personal use (not in a Github Org)'
+        description: "Set to true for personal use (not in a Github Org)"
         required: false
         type: boolean
 

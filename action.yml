@@ -1,22 +1,22 @@
-name: 'create-repository'
-description: 'Standardize github repository creation'
+name: "create-repository"
+description: "Standardize github repository creation"
 inputs:
   repo_name:
     required: true
-    description: 'Name of your new repository'
+    description: "Name of your new repository"
   repo_template:
     required: true
-    description: 'Kind of your new repository'
+    description: "Kind of your new repository"
   github_token:
     required: true
-    description: 'Github token used to create the repository'
+    description: "Github token used to create the repository"
   personal_use:
     required: false
-    description: 'Specify if repository will be created for a user (true) or an org (false)'
-    default: 'false'
+    description: "Specify if repository will be created for a user (true) or an org (false)"
+    default: "false"
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
 branding:
-  icon: 'terminal'
-  color: 'green'
+  icon: "terminal"
+  color: "green"

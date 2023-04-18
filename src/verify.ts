@@ -1,11 +1,11 @@
-import { getOctokit, context } from '@actions/github'
-import * as core from '@actions/core'
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
+import { getOctokit, context } from "@actions/github"
+import * as core from "@actions/core"
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript"
 
 // Look for inputs provided by user via workflow_dispatch event
 export function verifyInput(inputType: string, inputValue: string): string {
   core.debug(`checking ${inputType} (value: ${inputValue})`)
-  if (inputType == 'repo_input') {
+  if (inputType == "repo_input") {
     if (!inputValue.match(/^action-[a-z0-9\-]*$/)) {
       throw new Error(
         `Repository name provided (${inputValue}) is invalid. Pattern allowed: action-[a-z0-9-]`
@@ -13,7 +13,7 @@ export function verifyInput(inputType: string, inputValue: string): string {
     }
   }
 
-  core.info('[OK] Repository name')
+  core.info("[OK] Repository name")
   return inputValue
 }
 
@@ -50,7 +50,7 @@ export async function verifyRepository(
     }
   }
 
-  core.info('[OK] Repository space available')
+  core.info("[OK] Repository space available")
 }
 
 export async function verifyTemplateRepo(
@@ -66,7 +66,7 @@ export async function verifyTemplateRepo(
       repo: templateRepoName
     })
     .then((res) => {
-      core.info('[OK] Repository containing templates found')
+      core.info("[OK] Repository containing templates found")
       return
     })
     .catch((err) => {
@@ -94,7 +94,7 @@ export async function getTemplateTree(
     .getContent({
       owner: repoOwner,
       repo: templateRepoName,
-      path: '.'
+      path: "."
     })
     .then((res) => {
       let templateRepoContent = Object.values(res.data)
@@ -122,7 +122,7 @@ export async function getTemplateTree(
       owner: repoOwner,
       repo: templateRepoName,
       tree_sha: dirSHA,
-      recursive: 'yes'
+      recursive: "yes"
     })
     .then((res) => {
       core.debug(
