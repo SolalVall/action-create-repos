@@ -56,7 +56,7 @@ export async function pushTemplate(
       ref: "main"
     })
     .then((res) => {
-      let templateSelected = ".github"
+      let templateSelected = "gh-action"
       let templateRepoContent = Object.values(res.data)
       core.debug(`Repository content: ${JSON.stringify(templateRepoContent)}`)
 
