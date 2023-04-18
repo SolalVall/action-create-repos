@@ -14,6 +14,10 @@ on:
         options:
           - gh-action
           - tf-module
+      personal:
+        description: 'Set to true for personal use (not in a Github Org)'
+        required: false
+        type: boolean
 
 jobs:
   create-new-repo:
@@ -30,6 +34,8 @@ jobs:
       - name: Create repository for new action
         uses: ./
         with:
+          personal_use: ${{ inputs.personal }}
+          github_token: ${{ secrets.GH_TOKEN }}
           repo_name: ${{ inputs.repository }}
           repo_template: ${{ inputs.template }}
-          github_token: ${{ secrets.ORG_TOKEN }}
+      - run: ls -la

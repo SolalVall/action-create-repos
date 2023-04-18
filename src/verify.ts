@@ -1,5 +1,6 @@
 import { getOctokit, context } from '@actions/github'
 import * as core from '@actions/core'
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 
 // Look for inputs provided by user via workflow_dispatch event
 export function verifyInput(inputType: string, inputValue: string): string {
@@ -16,9 +17,12 @@ export function verifyInput(inputType: string, inputValue: string): string {
   return inputValue
 }
 
-export async function verifyRepository(repoName: string, token: string) {
+export async function verifyRepository(
+  repoName: string,
+  repoOwner: string,
+  token: string
+) {
   const octokit = getOctokit(token)
-  const repoOwner = context.repo.owner
 
   try {
     await octokit.rest.repos
@@ -28,7 +32,7 @@ export async function verifyRepository(repoName: string, token: string) {
       })
       .then((res) => {
         // If request is successfull it means the repository exists. So let's make the user aware
-        throw new Error(
+        throw Error(
           `Repository name provided (${repoName}) already exists in ${repoOwner}`
         )
       })
@@ -42,7 +46,7 @@ export async function verifyRepository(repoName: string, token: string) {
       })
   } catch (err) {
     if (err instanceof Error) {
-      throw new Error(err.message)
+      throw err
     }
   }
 
@@ -51,10 +55,10 @@ export async function verifyRepository(repoName: string, token: string) {
 
 export async function verifyTemplateRepo(
   templateRepoName: string,
+  repoOwner: string,
   token: string
 ) {
   const octokit = getOctokit(token)
-  const repoOwner = context.repo.owner
 
   await octokit.rest.repos
     .get({
@@ -75,4 +79,57 @@ export async function verifyTemplateRepo(
         )
       }
     })
+}
+
+export async function getTemplateTree(
+  templateRepoName: string,
+  templateSelected: string,
+  token: string
+) {
+  const octokit = getOctokit(token)
+  const repoOwner = context.repo.owner
+
+  // Retrive base SHA for dir provided
+  var dirSHA = await octokit.rest.repos
+    .getContent({
+      owner: repoOwner,
+      repo: templateRepoName,
+      path: '.'
+    })
+    .then((res) => {
+      let templateRepoContent = Object.values(res.data)
+      core.debug(`Repository content: ${JSON.stringify(templateRepoContent)}`)
+
+      // Filter API response for the template provided (template <=> directory in the repository)
+      let dirContent = templateRepoContent.find(
+        (dir) => dir.name === templateSelected
+      )
+
+      if (dirContent === undefined) {
+        throw new Error(
+          `Cannot find in ${templateRepoName} directory named: ${templateSelected}`
+        )
+      }
+
+      // Return git tree SHA only for the dir provided
+      core.debug(`Git tree SHA for ${templateSelected}: ${dirContent.sha}`)
+      return dirContent.sha
+    })
+
+  // Get all Git objects for the dir provided. Git tree details: https://docs.github.com/en/rest/git/trees?apiVersion=2022-11-28
+  var dirGitTree = await octokit.rest.git
+    .getTree({
+      owner: repoOwner,
+      repo: templateRepoName,
+      tree_sha: dirSHA,
+      recursive: 'yes'
+    })
+    .then((res) => {
+      core.debug(
+        `Git tree for ${templateSelected}: ${JSON.stringify(res.data.tree)}`
+      )
+      return res.data.tree
+    })
+
+  return dirGitTree
 }

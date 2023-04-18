@@ -10,6 +10,10 @@ inputs:
   github_token:
     required: true
     description: 'Github token used to create the repository'
+  personal_use:
+    required: false
+    description: 'Specify if repository will be created for a user (true) or an org (false)'
+    default: 'false'
 runs:
   using: 'node16'
   main: 'dist/index.js'
