@@ -1,63 +1,72 @@
 import { getOctokit, context } from "@actions/github"
 import * as core from "@actions/core"
 
-export async function createRepo(
+export async function repoCreate(
   owner: string,
-  repoName: string,
-  personalUse: string,
+  name: string,
+  description: string,
+  isPrivate: boolean,
+  personalUse: boolean,
   token: string
 ) {
   const octokit = getOctokit(token)
 
-  if (personalUse === "true") {
+  core.info(`> Creating empty repo (${name}) in ${owner}..`)
+  if (personalUse) {
     await octokit.rest.repos.createForAuthenticatedUser({
-      name: repoName,
-      private: true,
+      name,
+      private: isPrivate,
+      description,
       auto_init: true
     })
   } else {
     await octokit.rest.repos.createInOrg({
       org: owner,
-      name: repoName,
+      name,
+      private: isPrivate,
+      description,
       auto_init: true
     })
   }
+  core.info(`[OK] Repository named ${name} successfully created`)
 }
 
-export async function pushTemplate(
+export async function repoPush(
   owner: string,
-  repoName: string,
-  templateTree: any,
+  targetRepo: string,
+  template: string,
+  templatePath: string,
   token: string
 ) {
+  // The repo name from where the action is executed
+  const baseRepo = context.repo.repo
+  const commitMessage = `(init) auto-generated template from ${baseRepo} [template: ${template}]`
+  const committerName = ""
+  const committerEmail = ""
+  //const committerName = "SolalVall"
+  //const committerEmail = "solal.vallee@gmail.com"
   const octokit = getOctokit(token)
-  const tRepo = "action-test-2"
-  const bRepo = "actions"
-  const template = "gh-action"
-  const commitMessage = `(init) auto-generated template from ${bRepo} [template: ${template}]`
-  const committerName = "SolalVall"
-  const committerEmail = "solal.vallee@gmail.com"
 
   //console.log(bContent)
   core.info(`> Retrieving SHA for ${template} directory..`)
-  const dirSHA = await getDirSHA(
-    template,
-    "tests/templates",
+  var dirSHA = await getDirSHA(template, templatePath, owner, baseRepo, octokit)
+
+  core.info(`> Generating blobs for ${targetRepo}..`)
+  var blobTree = await generateBlobs(
+    dirSHA,
     owner,
-    bRepo,
+    baseRepo,
+    targetRepo,
     octokit
   )
 
-  core.info(`> Generating blobs for ${tRepo}..`)
-  const blobTree = await generateBlobs(dirSHA, owner, bRepo, tRepo, octokit)
-
   core.info(`> Creating git tree based on blobs generated..`)
-  const treeSHA = await createTree(owner, tRepo, blobTree, octokit)
+  var treeSHA = await createTree(owner, targetRepo, blobTree, octokit)
 
-  core.info(`> Generating new commit for ${tRepo}`)
-  const commitSHA = await createCommit(
+  core.info(`> Generating new commit for ${targetRepo}`)
+  var commitSHA = await createCommit(
     owner,
-    tRepo,
+    targetRepo,
     treeSHA,
     commitMessage,
     committerName,
@@ -65,8 +74,8 @@ export async function pushTemplate(
     octokit
   )
 
-  core.info(`> Push commit to ${tRepo}`)
-  await pushChanges(owner, tRepo, commitSHA, octokit)
+  core.info(`> Push commit to ${targetRepo}`)
+  await pushChanges(owner, targetRepo, commitSHA, octokit)
 }
 
 async function getDirSHA(

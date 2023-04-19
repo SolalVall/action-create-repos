@@ -1,18 +1,30 @@
 name: "create-repository"
 description: "Standardize github repository creation"
 inputs:
+  template:
+    required: true
+    description: "Kind of your new repository"
+  template_path:
+    required: false
+    description: "Directory where all your template are stored"
+    default: "."
   repo_name:
     required: true
     description: "Name of your new repository"
-  repo_template:
-    required: true
-    description: "Kind of your new repository"
+  repo_description:
+    required: false
+    description: "Description of your new repository"
+    default: ""
+  repo_is_private:
+    required: false
+    description: "Scope of your new repository"
+    default: "false"
   github_token:
     required: true
     description: "Github token used to create the repository"
   personal_use:
     required: false
-    description: "Specify if repository will be created for a user (true) or an org (false)"
+    description: "Define if repository will be created in a user profile (true) or a github org (false)"
     default: "false"
 runs:
   using: "node16"

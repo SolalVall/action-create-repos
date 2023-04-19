@@ -3,10 +3,6 @@ run-name: "Create repository [name: ${{ inputs.repository }}][template: ${{ inpu
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: "Name of your new repository"
-        required: true
-        type: string
       template:
         description: "Choose the kind of repository"
         required: true
@@ -14,6 +10,18 @@ on:
         options:
           - action
           - terraform
+      repository:
+        description: "Name of your new repository"
+        required: true
+        type: string
+      description:
+        description: "Description of your new repository"
+        required: false
+        type: string
+      is_private:
+        description: "Would you like your new repo to be private"
+        required: false
+        type: boolean
 
 jobs:
   create-new-repo:
@@ -30,7 +38,10 @@ jobs:
       - name: Create repository for new action
         uses: ./
         with:
+          repo_name: ${{ inputs.repository }}
+          repo_description: ${{ inputs.description}}
+          repo_is_private: ${{ inputs.is_private }}
+          template: ${{ inputs.template }}
+          template_path: "tests/templates"
           personal_use: true
           github_token: ${{ secrets.GH_TOKEN }}
-          repo_name: ${{ inputs.repository }}
-          repo_template: ${{ inputs.template }}
