@@ -31,6 +31,16 @@ export async function repoCreate(
   core.info(`[OK] Repository named ${name} successfully created`)
 }
 
+export async function repoDelete(owner: string, repo: string, token: string) {
+  const octokit = getOctokit(token)
+  core.info(`> Deleting ${repo} repository in ${owner}..`)
+  await octokit.rest.repos.delete({
+    owner,
+    repo
+  })
+  core.info(`[OK] Repository deleted`)
+}
+
 export async function repoPush(
   owner: string,
   targetRepo: string,
@@ -43,8 +53,6 @@ export async function repoPush(
   const commitMessage = `(init) auto-generated template from ${baseRepo} [template: ${template}]`
   const committerName = ""
   const committerEmail = ""
-  //const committerName = "SolalVall"
-  //const committerEmail = "solal.vallee@gmail.com"
   const octokit = getOctokit(token)
 
   //console.log(bContent)

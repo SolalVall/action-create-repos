@@ -26,6 +26,10 @@ inputs:
     required: false
     description: "Define if repository will be created in a user profile (true) or a github org (false)"
     default: "false"
+  delete_repo:
+    required: false
+    description: "For testing purpose it is useful to delete the repository after its creation"
+    default: "false"
 runs:
   using: "node16"
   main: "dist/index.js"

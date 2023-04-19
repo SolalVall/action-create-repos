@@ -44,4 +44,5 @@ jobs:
           template: ${{ inputs.template }}
           template_path: "tests/templates"
           personal_use: true
+          delete_repo: true
           github_token: ${{ secrets.GH_TOKEN }}
