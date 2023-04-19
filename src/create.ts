@@ -33,64 +33,110 @@ export async function pushTemplate(
   const octokit = getOctokit(token)
   const tRepo = "action-test-2"
   const bRepo = "actions"
-  var bContent = await octokit.rest.repos
-    .getContent({
-      owner,
-      repo: bRepo,
-      path: "tests/templates",
-      ref: "main"
-    })
-    .then((res) => {
-      let templateSelected = "gh-action"
-      let templateRepoContent = Object.values(res.data)
-      core.debug(`Repository content: ${JSON.stringify(templateRepoContent)}`)
+  const template = "gh-action"
+  const commitMessage = `(init) auto-generated template from ${bRepo} [template: ${template}]`
+  const committerName = "SolalVall"
+  const committerEmail = "solal.vallee@gmail.com"
 
-      // Filter API response for the template provided (template <=> directory in the repository)
-      let dirContent = templateRepoContent.find(
-        (dir) => dir.name === templateSelected
-      )
+  //console.log(bContent)
+  core.info(`> Retrieving SHA for ${template} directory..`)
+  const dirSHA = await getDirSHA(
+    template,
+    "tests/templates",
+    owner,
+    bRepo,
+    octokit
+  )
 
-      if (dirContent === undefined) {
-        throw new Error(`Cannot find directory named: ${templateSelected}`)
-      }
+  core.info(`> Generating blobs for ${tRepo}..`)
+  const blobTree = await generateBlobs(dirSHA, owner, bRepo, tRepo, octokit)
 
-      // Return git tree SHA only for the dir provided
-      core.debug(`Git tree SHA for ${templateSelected}: ${dirContent.sha}`)
-      return dirContent.sha
-    })
+  core.info(`> Creating git tree based on blobs generated..`)
+  const treeSHA = await createTree(owner, tRepo, blobTree, octokit)
 
-  console.log(bContent)
-  //tree_sha: bTarget.data.commit.sha
-  var bTree = await octokit.rest.git
-    .getTree({
-      owner,
-      repo: bRepo,
-      tree_sha: bContent,
-      recursive: "yes"
-    })
-    .then((res) => {
-      return res.data.tree
-    })
+  core.info(`> Generating new commit for ${tRepo}`)
+  const commitSHA = await createCommit(
+    owner,
+    tRepo,
+    treeSHA,
+    commitMessage,
+    committerName,
+    committerEmail,
+    octokit
+  )
 
-  console.log(bTree)
+  core.info(`> Push commit to ${tRepo}`)
+  await pushChanges(owner, tRepo, commitSHA, octokit)
+}
 
-  const promises = bTree.map(async (file: any) => {
-    // I've excluded all '.github/' blob because they are getting rejected during
-    // git tree creation....
-    if (file["type"] == "blob" && !file["path"].startsWith(".github")) {
+async function getDirSHA(
+  templateName: string,
+  templatePath: string,
+  owner: string,
+  repo: string,
+  octokit: any
+) {
+  // First we get the git content of our template repository
+  const repoContent = await octokit.rest.repos.getContent({
+    owner,
+    repo,
+    path: templatePath,
+    ref: "main"
+  })
+
+  // Filter API response to the template provided (template <=> directory in the repository)
+  let dirContent = repoContent.data.find(
+    (dir: any) => dir.name === templateName
+  )
+
+  if (dirContent === undefined) {
+    throw new Error(`Cannot find directory named: ${templateName}`)
+  }
+
+  core.debug(`API details about ${templateName}: ${JSON.stringify(dirContent)}`)
+  core.info(
+    `[OK] Git SHA for ${templateName} successfully retrieved. (value: ${dirContent.sha})`
+  )
+  return dirContent.sha
+}
+
+async function generateBlobs(
+  tree_sha: string,
+  owner: string,
+  currentRepo: string,
+  targetRepo: string,
+  octokit: any
+) {
+  // First we get the git tree content based on the directory SHA retrieved for our template
+  var templateTree = await octokit.rest.git.getTree({
+    owner,
+    repo: currentRepo,
+    tree_sha,
+    recursive: "yes"
+  })
+
+  // Then:
+  // 1. Retrieve all the 'blob' from that directory (blob <=> actual file in git)
+  // 2. Recreate the 'blob' but using a different repo as the target (SHA generated will be different)
+  const promises = templateTree.data.tree.map(async (file: any) => {
+    if (file["type"] == "blob") {
+      // Retrieve 'blob'
       var templateBlob = await octokit.rest.git.getBlob({
         owner,
-        repo: bRepo,
+        repo: currentRepo,
         file_sha: file["sha"]
       })
 
+      // Recreate 'blob' by targeting our new repository
       var newBlob = await octokit.rest.git.createBlob({
         owner,
-        repo: tRepo,
+        repo: targetRepo,
         content: templateBlob.data.content,
         encoding: "base64"
       })
 
+      // Return new 'blob' content. Will be used to create a new git tree
+      core.info(`[OK] blob for ${file["path"]} successfully created.`)
       return {
         path: file["path"],
         mode: file["mode"],
@@ -99,34 +145,64 @@ export async function pushTemplate(
       }
     }
   })
-  const newBlobTree = await Promise.all(promises)
-  const finalBlobTree = newBlobTree.filter((item) => item)
 
-  console.log(finalBlobTree)
-  var tree = await octokit.rest.git.createTree({
+  // Dynamically populate our new blob tree
+  const tree = await Promise.all(promises)
+  const cleanedTree = tree.filter((item) => item)
+  return cleanedTree
+}
+
+async function createTree(
+  owner: string,
+  repo: string,
+  tree: any,
+  octokit: any
+) {
+  var targetTree = await octokit.rest.git.createTree({
     owner,
-    repo: tRepo,
-    tree: Object(finalBlobTree)
+    repo,
+    tree
   })
+  core.info(`[OK] Tree generated for ${repo}. (SHA: ${targetTree.data.sha})`)
+  core.debug(`API git tree response ${JSON.stringify(targetTree)}`)
+  return targetTree.data.sha
+}
 
-  var commitSHA = await octokit.rest.git
-    .createCommit({
-      owner,
-      repo: tRepo,
-      message: "test",
-      tree: tree.data.sha,
-      name: "SolalVall",
-      email: "solal.vallee@gmail.com"
-    })
-    .then((res) => {
-      return res.data.sha
-    })
-
-  octokit.rest.git.updateRef({
+async function createCommit(
+  owner: string,
+  repo: string,
+  tree: string,
+  message: string,
+  name: string,
+  email: string,
+  octokit: any
+) {
+  var commitSHA = await octokit.rest.git.createCommit({
     owner,
-    repo: "action-test-2",
+    repo,
+    message,
+    tree,
+    name,
+    email
+  })
+  core.info(`[OK] Commit successfully created. (SHA: ${commitSHA.data.sha})`)
+  core.debug(`API git commit response: ${JSON.stringify(commitSHA)}`)
+  return commitSHA.data.sha
+}
+
+async function pushChanges(
+  owner: string,
+  repo: string,
+  sha: string,
+  octokit: any
+) {
+  var pushContent = await octokit.rest.git.updateRef({
+    owner,
+    repo,
     ref: "heads/main",
-    sha: commitSHA,
+    sha,
     force: true
   })
+  core.debug(`API git push response: ${JSON.stringify(pushContent)}`)
+  core.info(`[OK] ${repo} updated: https://github.com/${owner}/${repo})`)
 }
