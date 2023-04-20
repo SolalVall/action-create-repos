@@ -1,0 +1,8 @@
+{
+  "inputs": {
+    "template": "action",
+    "repository": "action-test",
+    "description": "Repo generated automatically",
+    "is_private": "true"
+  }
+}

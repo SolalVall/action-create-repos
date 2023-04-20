@@ -9,7 +9,6 @@ on:
         type: choice
         options:
           - action
-          - terraform
       repository:
         description: "Name of your new repository"
         required: true
@@ -35,14 +34,15 @@ jobs:
         run: npm run format
       - name: Build
         run: npm run all
-      - name: Create repository for new action
+      - run: ls -laR tests/
+      - name: Test action
         uses: ./
         with:
           repo_name: ${{ inputs.repository }}
           repo_description: ${{ inputs.description}}
           repo_is_private: ${{ inputs.is_private }}
           template: ${{ inputs.template }}
-          template_path: "tests/templates"
+          template_path: "tests/act/template_example"
           personal_use: true
           delete_repo: true
           github_token: ${{ secrets.GH_TOKEN }}

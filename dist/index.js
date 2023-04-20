@@ -48,13 +48,7 @@ const delRepo = core.getInput("delete_repo") === "true";
         (0, verify_1.verifyName)(repoName, template);
         await (0, verify_1.verifyExistence)(repoName, owner, token);
         await (0, repo_1.repoCreate)(owner, repoName, repoDescription, repoPrivate, is_personal, token);
-        try {
-            await (0, repo_1.repoPush)(owner, repoName, template, templatePath, token);
-        }
-        catch (_a) {
-            // When push failed we want to remove the newly created repo in order to fix & retry
-            await (0, repo_1.repoDelete)(owner, repoName, token);
-        }
+        await (0, repo_1.repoPush)(owner, repoName, template, templatePath, token);
         // This part is only use for testing with act.
         if (delRepo) {
             await (0, repo_1.repoDelete)(owner, repoName, token);

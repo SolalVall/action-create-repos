@@ -26,12 +26,7 @@ const delRepo: boolean = core.getInput("delete_repo") === "true"
       is_personal,
       token
     )
-    try {
-      await repoPush(owner, repoName, template, templatePath, token)
-    } catch {
-      // When push failed we want to remove the newly created repo in order to fix & retry
-      await repoDelete(owner, repoName, token)
-    }
+    await repoPush(owner, repoName, template, templatePath, token)
 
     // This part is only use for testing with act.
     if (delRepo) {
