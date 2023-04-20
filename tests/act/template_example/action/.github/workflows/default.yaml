@@ -1,4 +1,4 @@
-name: 'Release'
+name: "Release new version"
 on:
   push:
     branches:
@@ -10,6 +10,10 @@ jobs:
     steps:
       - name: Fetch repository
         uses: actions/checkout@v3
+      - name: Install node modules
+        run: npm install
+      - name: Build and compile
+        run: npm run all
       - name: Tag repository
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
@@ -21,4 +25,7 @@ jobs:
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: |
+            ## Changelog 
+            ${{ steps.tag_version.outputs.changelog }}
+          artifacts: "dist/index.js,action.yml,node_modules/*"
