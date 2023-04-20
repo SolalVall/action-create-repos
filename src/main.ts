@@ -29,7 +29,7 @@ const delRepo: boolean = core.getInput("delete_repo") === "true"
       token
     )
     if (writeAccessWorkflow) {
-      repoWorkflowAccess(owner, repoName, token)
+      await repoWorkflowAccess(owner, repoName, token)
     }
     await repoPush(owner, repoName, template, templatePath, token)
 
