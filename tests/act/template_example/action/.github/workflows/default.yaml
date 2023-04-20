@@ -1,4 +1,4 @@
-name: "Release new version"
+name: 'Release new version'
 on:
   push:
     branches:
@@ -28,4 +28,3 @@ jobs:
           body: |
             ## Changelog 
             ${{ steps.tag_version.outputs.changelog }}
-          artifacts: "dist/index.js,action.yml,node_modules/*"

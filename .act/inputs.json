@@ -3,6 +3,7 @@
     "template": "action",
     "repository": "action-test",
     "description": "Repo generated automatically",
-    "is_private": "true"
+    "is_private": "true",
+    "write_access_workflow": "true"
   }
 }

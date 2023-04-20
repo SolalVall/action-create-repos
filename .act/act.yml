@@ -18,7 +18,11 @@ on:
         required: false
         type: string
       is_private:
-        description: "Would you like your new repo to be private"
+        description: "Select to make repository private"
+        required: false
+        type: boolean
+      write_access_workflow:
+        description: "Select to modify workflow access"
         required: false
         type: boolean
 
@@ -34,13 +38,13 @@ jobs:
         run: npm run format
       - name: Build
         run: npm run all
-      - run: ls -laR tests/
       - name: Test action
         uses: ./
         with:
           repo_name: ${{ inputs.repository }}
           repo_description: ${{ inputs.description}}
           repo_is_private: ${{ inputs.is_private }}
+          repo_workflow_access: ${{ inputs.write_access_workflow }}
           template: ${{ inputs.template }}
           template_path: "tests/act/template_example"
           personal_use: true

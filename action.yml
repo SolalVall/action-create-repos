@@ -19,6 +19,10 @@ inputs:
     required: false
     description: "Scope of your new repository"
     default: "false"
+  repo_workflow_access:
+    required: false
+    description: "Modify workflow permission for the reposity"
+    default: "false"
   github_token:
     required: true
     description: "Github token used to create the repository"

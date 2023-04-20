@@ -41,6 +41,26 @@ export async function repoDelete(owner: string, repo: string, token: string) {
   core.info(`[OK] Repository deleted`)
 }
 
+export async function repoWorkflowAccess(
+  owner: string,
+  repo: string,
+  token: string
+) {
+  // If a template contains a .github/workflows. It can be useful to give workflow write access in the repository setting.
+  // In fact, it allows to automatically make the template workflow working if it requires write access.
+  // Details: https://docs.github.com/en/rest/actions/permissions?apiVersion=2022-11-28#set-default-workflow-permissions-for-a-repository
+  const octokit = getOctokit(token)
+  core.info(`> Setting workflow access to write for ${repo} repository..`)
+  await octokit.rest.actions.setGithubActionsDefaultWorkflowPermissionsRepository(
+    {
+      owner,
+      repo,
+      default_workflow_permissions: "write"
+    }
+  )
+  core.info(`[OK] Workflow access setting updated`)
+}
+
 export async function repoPush(
   owner: string,
   targetRepo: string,
@@ -221,5 +241,5 @@ async function pushChanges(
     force: true
   })
   core.debug(`API git push response: ${JSON.stringify(pushContent)}`)
-  core.info(`[OK] ${repo} updated: https://github.com/${owner}/${repo})`)
+  core.info(`[OK] ${repo} updated: https://github.com/${owner}/${repo}`)
 }

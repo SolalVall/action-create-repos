@@ -42,12 +42,16 @@ const templatePath = core.getInput("template_path");
 const repoName = core.getInput("repo_name");
 const repoDescription = core.getInput("repo_description");
 const repoPrivate = core.getInput("repo_is_private") === "true";
+const writeAccessWorkflow = core.getInput("repo_workflow_access") === "true";
 const delRepo = core.getInput("delete_repo") === "true";
 (async function main() {
     try {
         (0, verify_1.verifyName)(repoName, template);
         await (0, verify_1.verifyExistence)(repoName, owner, token);
         await (0, repo_1.repoCreate)(owner, repoName, repoDescription, repoPrivate, is_personal, token);
+        if (writeAccessWorkflow) {
+            (0, repo_1.repoWorkflowAccess)(owner, repoName, token);
+        }
         await (0, repo_1.repoPush)(owner, repoName, template, templatePath, token);
         // This part is only use for testing with act.
         if (delRepo) {
@@ -91,7 +95,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.repoPush = exports.repoDelete = exports.repoCreate = void 0;
+exports.repoPush = exports.repoWorkflowAccess = exports.repoDelete = exports.repoCreate = void 0;
 const github_1 = __nccwpck_require__(5438);
 const core = __importStar(__nccwpck_require__(2186));
 async function repoCreate(owner, name, description, isPrivate, personalUse, token) {
@@ -127,6 +131,20 @@ async function repoDelete(owner, repo, token) {
     core.info(`[OK] Repository deleted`);
 }
 exports.repoDelete = repoDelete;
+async function repoWorkflowAccess(owner, repo, token) {
+    // If a template contains a .github/workflows. It can be useful to give workflow write access in the repository setting.
+    // In fact, it allows to automatically make the template workflow working if it requires write access.
+    // Details: https://docs.github.com/en/rest/actions/permissions?apiVersion=2022-11-28#set-default-workflow-permissions-for-a-repository
+    const octokit = (0, github_1.getOctokit)(token);
+    core.info(`> Setting workflow access to write for ${repo} repository..`);
+    await octokit.rest.actions.setGithubActionsDefaultWorkflowPermissionsRepository({
+        owner,
+        repo,
+        default_workflow_permissions: "write"
+    });
+    core.info(`[OK] Workflow access setting updated`);
+}
+exports.repoWorkflowAccess = repoWorkflowAccess;
 async function repoPush(owner, targetRepo, template, templatePath, token) {
     // The repo name from where the action is executed
     const baseRepo = github_1.context.repo.repo;
@@ -237,7 +255,7 @@ async function pushChanges(owner, repo, sha, octokit) {
         force: true
     });
     core.debug(`API git push response: ${JSON.stringify(pushContent)}`);
-    core.info(`[OK] ${repo} updated: https://github.com/${owner}/${repo})`);
+    core.info(`[OK] ${repo} updated: https://github.com/${owner}/${repo}`);
 }
 
 
