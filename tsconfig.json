@@ -8,5 +8,5 @@
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
     "strict": true /* Enable all strict type-checking options. */
   },
-  "exclude": ["node_modules", "tests"]
+  "exclude": ["node_modules", "tests", "jest.config.ts"]
 }
