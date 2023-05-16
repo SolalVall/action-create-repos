@@ -1,4 +1,4 @@
-name: "Verify build"
+name: "Verify formatting, tests and build process"
 on:
   pull_request:
 
